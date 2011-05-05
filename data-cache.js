@@ -37,7 +37,10 @@ module.exports =
         , errs
         , ret = {}
       routes.forEach(function(r) {
-        module.exports.getData(r, function(err, data) {
+        url = r.replace(/:([^\/]+)/g, function(_, m) {
+          return req.params[m]
+        })
+        module.exports.getData(url, function(err, data) {
           finished++
           if (err) {
             if (!errs) errs = [err]
