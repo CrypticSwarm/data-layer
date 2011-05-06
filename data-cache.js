@@ -1,3 +1,4 @@
+module.exports = function(next) {
 var cache = {}
   , queue = {}
   , depend = {}
@@ -6,12 +7,12 @@ var cache = {}
     addRoute = methods
   })
 
-function notFound(req) {
+next = next || function notFound(route, callback) {
   return function() {
   }
 }
 
-module.exports = 
+  var CL =
 { getData: function getData(route, callback) {
     if (cache[route]) return callback(null, cache[route])
     else if (queue[route]) return queue[route].push(callback)
@@ -22,7 +23,7 @@ module.exports =
         cb(err, data)
       })
       delete queue[route]
-    }, notFound(req))
+    }, next(route, callback))
   }
 
 , compositeRoute: function(route, dependencies) {
@@ -32,12 +33,12 @@ module.exports =
       if (!Array.isArray(depend[r])) depend[r] = [route]
       else depend[r].push(route)
     })
-    module.exports.addRoute(route, function(req, callback) {
+    CL.addRoute(route, function(req, callback) {
       var finished = 0
         , errs
         , ret = {}
       routes.forEach(function(r) {
-        module.exports.getData(prepareRoute(r, req.params), function(err, data) {
+        CL.getData(prepareRoute(r, req.params), function(err, data) {
           finished++
           if (err) {
             if (!errs) errs = [err]
@@ -61,7 +62,7 @@ module.exports =
             else depend[route].push(req.url)
           }
           if (ttl !== -1) setTimeout(function() {
-            module.exports.clearCache(route)
+            CL.clearCache(route)
           }, ttl)
         }
         callback(err, data)
@@ -77,7 +78,7 @@ module.exports =
 
 , connectDataTemplate: function connectDataTemplate(dataRoute, template) {
     return function dataTemplate(req, res) {
-      module.exports.getData(prepareRoute(dataRoute, req.params), function(err, data) {
+      CL.getData(prepareRoute(dataRoute, req.params), function(err, data) {
         if (err) {
           res.end()
           return console.log(err)
@@ -89,7 +90,7 @@ module.exports =
 
 , connectJSONTemplate: function connectJSONTemplate(dataRoute) {
     return function JSONTemplate(req, res) {
-      module.exports.getData(prepareRoute(dataRoute, req.params), function(err, data) {
+      CL.getData(prepareRoute(dataRoute, req.params), function(err, data) {
         if (err) {
           res.end()
           return console.log(err)
@@ -100,6 +101,8 @@ module.exports =
     }
   }
 
+}
+  return CL
 }
 
 function prepareRoute(str, params) {
