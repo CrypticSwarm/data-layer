@@ -25,7 +25,7 @@ module.exports =
     }, notFound(req))
   }
 
-, compositeRoute: function(route, dependencies, modifier) {
+, compositeRoute: function(route, dependencies) {
     var routes = Object.keys(dependencies)
       , len = routes.length
     routes.forEach(function(r) {
@@ -37,10 +37,7 @@ module.exports =
         , errs
         , ret = {}
       routes.forEach(function(r) {
-        url = r.replace(/:([^\/]+)/g, function(_, m) {
-          return req.params[m]
-        })
-        module.exports.getData(url, function(err, data) {
+        module.exports.getData(prepareRoute(r, req.params), function(err, data) {
           finished++
           if (err) {
             if (!errs) errs = [err]
@@ -78,4 +75,35 @@ module.exports =
     if (depend[route]) depend[route].forEach(clearCache)
   }
 
+, connectDataTemplate: function connectDataTemplate(dataRoute, template) {
+    return function dataTemplate(req, res) {
+      module.exports.getData(prepareRoute(dataRoute, req.params), function(err, data) {
+        if (err) {
+          res.end()
+          return console.log(err)
+        }
+        res.render(template, { locals: data })
+      })
+    }
+  }
+
+, connectJSONTemplate: function connectJSONTemplate(dataRoute) {
+    return function JSONTemplate(req, res) {
+      module.exports.getData(prepareRoute(dataRoute, req.params), function(err, data) {
+        if (err) {
+          res.end()
+          return console.log(err)
+        }
+        res.header('Content-Type', 'text/json')
+        res.end(JSON.stringify(data))
+      })
+    }
+  }
+
+}
+
+function prepareRoute(str, params) {
+  return str.replace(/:([^\/]+)/g, function(_, m) {
+    return params[m] == null ? '' : params[m]
+  })
 }
