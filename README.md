@@ -20,10 +20,11 @@ Add a handler for the specified url.
 
 ## Example
 
-  addRoute('blog/:slug', function(req, cb) {
-    getBlogPost(req.params.slug, cb)
-  })
-
+``` js
+addRoute('blog/:slug', function(req, cb) {
+  getBlogPost(req.params.slug, cb)
+})
+```
 
 # compositeRoute
 
@@ -34,14 +35,16 @@ Helper to easily compile several routes into one object
 
 ## Example
 
-  compositeRoute('blog/:slug/data',
-    { 'blog/:slug': 'blogPost'
-    , 'blog/:slug/comments': 'comments'
-    })
-  // Generates
-  // { blogPost: blogPostData
-  // , comments: commentData
-  // }
+``` js
+compositeRoute('blog/:slug/data',
+  { 'blog/:slug': 'blogPost'
+  , 'blog/:slug/comments': 'comments'
+  })
+// Generates
+// { blogPost: blogPostData
+// , comments: commentData
+// }
+```
 
 # getData
 
@@ -52,10 +55,12 @@ Get data from specified route.
 
 ## Example
 
-  getData('blog/first-post', function(err, post) {
-    if (err) return handleErr(err)
-    doSomethingBlogPost(post)
-  })
+``` js
+getData('blog/first-post', function(err, post) {
+  if (err) return handleErr(err)
+  doSomethingBlogPost(post)
+})
+```
 
 
 # connectDataTemplate
@@ -67,7 +72,9 @@ External url handler that will render a template with the data result from an in
 
 ## Example
   
-  app.get('/blog/:slug', connectDataTemplate('blog/:slug/data', 'blogPost'))
+``` js
+app.get('/blog/:slug', connectDataTemplate('blog/:slug/data', 'blogPost'))
+```
 
 
 # connectJSONTemplate
@@ -78,7 +85,9 @@ External url handler that gives JSON output of internal url data
 
 ## Example
 
-  app.get('/api/blog/:slug/comments', connectJSONTemplate('blog/:slug/comments'))
+``` js
+app.get('/api/blog/:slug/comments', connectJSONTemplate('blog/:slug/comments'))
+```
 
 
 
