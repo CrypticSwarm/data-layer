@@ -53,7 +53,7 @@ next = next || function notFound(route, callback) {
 
 , addRoute: function(route, func, ttl) {
     var f = func
-    if (ttl != null) f = function(req, callback) {
+    if (ttl != null) f = function(req, callback, next) {
       func(req, function addToCache(err, data) {
         if (!err) {
           cache[req.url] = data
@@ -66,7 +66,7 @@ next = next || function notFound(route, callback) {
           }, ttl)
         }
         callback(err, data)
-      })
+      }, next)
     }
     addRoute.get(route, f)
   }
