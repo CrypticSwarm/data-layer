@@ -1,0 +1,11 @@
+{ "name": "data-layer"
+, "description": "Data layer for nodejs apps.  Provides a internal url interface to grab data."
+, "version": "0.1.0"
+, "authors": ["Perrin Westrich <crypticswarm@gmail.com>"]
+, "repository":
+  { "type": "git"
+  , "url": "https://github.com/CrypticSwarm/data-layer"
+  }
+, "main": "./data-layer.js"
+, "dependencies": { "express": "1.0.7" }
+}
