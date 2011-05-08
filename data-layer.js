@@ -76,13 +76,14 @@ module.exports = function(next) {
       if (depend[route]) depend[route].forEach(clearCache)
     }
 
-  , connectDataTemplate: function connectDataTemplate(dataRoute, template) {
+  , connectDataTemplate: function connectDataTemplate(dataRoute, template, params) {
       return function dataTemplate(req, res) {
         CL.getData(prepareRoute(dataRoute, req.params), function(err, data) {
           if (err) {
             res.end()
             return console.log(err)
           }
+          if (params) data = appendCall(append({}, data), params, req)
           res.render(template, { locals: data })
         })
       }
@@ -109,4 +110,18 @@ function prepareRoute(str, params) {
   return str.replace(/:([^\/]+)/g, function(_, m) {
     return params[m] == null ? '' : params[m]
   })
+}
+
+function append(obj, copy) {
+  Object.keys(copy).forEach(function(key) {
+    obj[key] = copy[key]
+  })
+  return obj
+}
+
+function appendCall(obj, copy, req) {
+  Object.keys(copy).forEach(function(key) {
+    obj[key] = copy[key](req)
+  })
+  return obj
 }
