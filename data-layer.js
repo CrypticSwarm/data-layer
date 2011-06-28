@@ -44,6 +44,7 @@ module.exports = function(next) {
               if (!errs) errs = [err]
               else errs.push(err)
             }
+            else if (typeof dependencies[r] === 'function') dependencies[r](data, ret)
             else ret[dependencies[r]] = data
             if (finished === len) callback(errs, ret)
           })
