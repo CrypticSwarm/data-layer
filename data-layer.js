@@ -96,7 +96,7 @@ module.exports = function(next) {
             res.end()
             return console.log(err)
           }
-          res.header('Content-Type', 'text/json')
+          res.header('Content-Type', 'application/json')
           res.end(JSON.stringify(data))
         })
       }
