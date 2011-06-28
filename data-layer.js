@@ -84,7 +84,7 @@ module.exports = function(next) {
             return console.log(err)
           }
           if (params) data = appendCall(append({}, data), params, req)
-          res.render(template, { locals: data })
+          res.render(template, data)
         })
       }
     }
