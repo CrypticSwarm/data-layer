@@ -108,7 +108,7 @@ module.exports = function(next) {
 }
 
 function prepareRoute(str, params) {
-  return str.replace(/:([^\/]+)/g, function(_, m) {
+  return str.replace(/:([^\/?]+)\??/g, function(_, m) {
     return params[m] == null ? '' : params[m]
   })
 }
