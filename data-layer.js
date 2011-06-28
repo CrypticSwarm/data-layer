@@ -13,17 +13,9 @@ module.exports = function(next) {
   }
 
   var CL =
-  { getData: function getData(route, callback) {
-      if (cache[route]) return callback(null, cache[route])
-      else if (queue[route]) return queue[route].push(callback)
-      queue[route] = [callback]
-      var req = { url: route, method: 'GET' }
-      routeIt(req, function clearQueue(err, data) {
-        queue[route].forEach(function(cb) {
-          cb(err, data)
-        })
-        delete queue[route]
-      }, next(route, callback))
+  { getData: function getData(route, callback, user) {
+      var req = { url: route, method: 'GET', user: user }
+      routeIt(req, callback)
     }
 
   , compositeRoute: function(route, dependencies) {
@@ -47,26 +39,39 @@ module.exports = function(next) {
             else if (typeof dependencies[r] === 'function') dependencies[r](data, ret)
             else ret[dependencies[r]] = data
             if (finished === len) callback(errs, ret)
-          })
+          }, req.user)
         })
       }, -1)
     }
 
-  , addRoute: function(route, func, ttl) {
-      var f = func
-      if (ttl != null) f = function(req, callback, next) {
+  , addRoute: function(route, func, opts) {
+      opts = opts || {}
+      var f
+        , ttl = opts.ttl || 0
+      f = function(req, callback, next) {
+        if (cache[route]) return callback(null, cache[route])
+        else if (queue[route]) return queue[route].push(callback)
+        if (!opts.volatile) queue[route] = [callback]
         func(req, function addToCache(err, data) {
           if (!err) {
-            cache[req.url] = data
-            if (req.url !== route) {
-              if (!Array.isArray(depend[route])) depend[route] = [req.url]
-              else depend[route].push(req.url)
+            if (ttl > 0) {
+              cache[req.url] = data
+              if (req.url !== route) {
+                if (!Array.isArray(depend[route])) depend[route] = [req.url]
+                else depend[route].push(req.url)
+              }
+              if (ttl !== -1) setTimeout(function() {
+                CL.clearCache(route)
+              }, ttl)
             }
-            if (ttl !== -1) setTimeout(function() {
-              CL.clearCache(route)
-            }, ttl)
           }
-          callback(err, data)
+          if (!opts.volatile) {
+            queue[route].forEach(function(cb) {
+              cb(err, data)
+            })
+            delete queue[route]
+          }
+          else callback(err, data)
         }, next)
       }
       addRoute.get(route, f)
@@ -86,7 +91,7 @@ module.exports = function(next) {
           }
           if (params) data = appendCall(append({}, data), params, req)
           res.render(template, data)
-        })
+        }, req.user)
       }
     }
 
@@ -99,7 +104,7 @@ module.exports = function(next) {
           }
           res.header('Content-Type', 'application/json')
           res.end(JSON.stringify(data))
-        })
+        }, req.user)
       }
     }
 
