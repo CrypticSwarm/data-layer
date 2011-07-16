@@ -49,27 +49,29 @@ module.exports = function(next) {
       var f
         , ttl = opts.ttl || 0
       f = function(req, callback, next) {
-        if (cache[route]) return callback(null, cache[route])
-        else if (queue[route]) return queue[route].push(callback)
-        if (!opts.volatile) queue[route] = [callback]
+        if (cache[req.url]) {
+          return callback(null, cache[req.url])
+        }
+        else if (queue[req.url]) return queue[req.url].push(callback)
+        if (!opts.volatile) queue[req.url] = [callback]
         func(req, function addToCache(err, data) {
           if (!err) {
-            if (ttl > 0) {
+            if (ttl > 0 || ttl === -1) {
               cache[req.url] = data
               if (req.url !== route) {
                 if (!Array.isArray(depend[route])) depend[route] = [req.url]
                 else depend[route].push(req.url)
               }
               if (ttl !== -1) setTimeout(function() {
-                CL.clearCache(route)
+                CL.clearCache(req.url)
               }, ttl)
             }
           }
           if (!opts.volatile) {
-            queue[route].forEach(function(cb) {
+            queue[req.url].forEach(function(cb) {
               cb(err, data)
             })
-            delete queue[route]
+            delete queue[req.url]
           }
           else callback(err, data)
         }, next)
