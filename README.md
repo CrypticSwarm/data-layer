@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/CrypticSwarm/data-layer.png)](http://travis-ci.org/CrypticSwarm/data-layer)
 Data Cache Layer
 ================
 
